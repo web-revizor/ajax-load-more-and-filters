@@ -3,6 +3,9 @@
 ## WordPress plugin
 Easy load more, filter and searching
 
+[Download](https://github.com/web-revizor/ajax-load-more-and-filters/releases)
+
+
 ### Pagination:
 - List
 - Button
