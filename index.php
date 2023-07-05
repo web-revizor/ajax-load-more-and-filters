@@ -3,7 +3,7 @@
 Plugin Name:  All posts ajax
 Plugin URI:
 Description:  All posts ajax load more, search and filter
-Version:      0.9.8.5
+Version:      0.9.8.6
 Author: WebRevizor
 Author URI:
 License:      GPL2
@@ -402,7 +402,7 @@ function all_posts_ajax_att($atts)
 	$wp_query = new WP_Query($args);
 
 
-	if ($filter_by_category === 'true') {
+	if ($filter_by_category === 'true' || $enable_search === 'true') {
 		require_once dirname(__FILE__) . '/inc/filter/filter.php';
 	}
 
