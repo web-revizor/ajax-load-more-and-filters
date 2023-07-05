@@ -377,6 +377,7 @@ function all_posts_ajax_att($atts)
 
 	$load_more_variables = array(
 		'load_more_label' => $load_more_label,
+		'filter_by_category'=> $filter_by_category,
 		'filter_row_classes' => $filter_row_classes,
 		'filter_item_classes' => $filter_item_classes,
 		'filter_taxonomy' => $filter_taxonomy,

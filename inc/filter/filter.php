@@ -11,6 +11,7 @@ global $load_more_variables;
 			</button>
 		</div>
 	<?php endif; ?>
+	<?php if ($load_more_variables['filter_by_category'] === 'true'): ?>
 	<div class="<?= $load_more_variables['filter_row_classes'] ?>">
 		<button type="submit"
 		        class="js-category-filter allCategories active <?= $load_more_variables['filter_item_classes']; ?>">
@@ -43,4 +44,5 @@ global $load_more_variables;
 			<?php endforeach; ?>
 		<?php endforeach; ?>
 	</div>
+	<?php endif; ?>
 </form>
