@@ -1,12 +1,13 @@
 # AJAX load more and filters
 
 ## WordPress plugin
+
 Easy load more, filter and searching
 
 [Download](https://github.com/web-revizor/ajax-load-more-and-filters/releases)
 
-
 ### Pagination:
+
 - List
 - Button
 - Both
@@ -17,6 +18,7 @@ Easy load more, filter and searching
 ````
 [all_posts_ajax post_type="post" posts_per_page="10" type_pagination="default"]
 ````
+
 ### Shortcode Parameters (generate in admin panel)
 
 - post_type
@@ -29,6 +31,9 @@ Easy load more, filter and searching
 - filter_row_classes
 - filter_item_classes
 - filter_taxonomy
+- multiply_filter_button
+- enable_clear_button
+- filter_type
 - all_category_button
 - enable_search
 - label_search_button
@@ -46,7 +51,7 @@ posts_per_page - can be "-1" for infinity posts on page
 - AjaxPaginationDone
 - AjaxFilterDone
 
-### Example 
+### Example
 
 ````
 $(document).on('AjaxFilterDone', function() {

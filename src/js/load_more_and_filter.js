@@ -5,12 +5,11 @@ jQuery(function ($) {
         posts_per_page = '',
         posts_type = '',
         pagination_type = '',
-        taxonomy_type = '',
         more_classes = '',
         more_label = '',
         prev_text = '',
         next_text = '',
-        category = '',
+        category = {},
         search = '',
         order = '',
         this_load_more = '',
@@ -26,10 +25,6 @@ jQuery(function ($) {
 
     function pagination_type_fn() {
         pagination_type = row_items.attr('data-pagination-type');
-    }
-
-    function taxonomy_type_fn() {
-        taxonomy_type = row_items.attr('data-taxonomy');
     }
 
     function more_classes_fn() {
@@ -48,17 +43,41 @@ jQuery(function ($) {
         next_text = row_items.attr('data-next-text');
     }
 
+    function category_fn() {
+        category = {};
+        if ($('button').hasClass('js-category-filter')) {
+            $('.js-category-filter.active').each(function () {
+                if (!$(this).hasClass('allCategories')) {
+                    var taxonomy = $(this).attr('data-taxonomy');
+                    var slug = $(this).attr('data-slug');
+
+                    category[taxonomy] = category[taxonomy] && Array.isArray(category[taxonomy]) ? [...category[taxonomy], slug] : [slug]
+                }
+            })
+        }
+        if ($('select').hasClass('js-category-filter-select')) {
+            $('.js-category-filter-select').each(function () {
+                if ($(this).val()) {
+                    var taxonomy = $(this).attr('data-taxonomy');
+                    var slug = $(this).val();
+
+                    category[taxonomy] = category[taxonomy] && Array.isArray(category[taxonomy]) ? [...category[taxonomy], slug] : [slug]
+                }
+
+            })
+        }
+    }
+
     function all_param() {
         posts_per_page_fn();
         posts_type_fn();
         pagination_type_fn();
-        taxonomy_type_fn();
         more_classes_fn();
         more_label_fn();
         prev_text_fn();
         next_text_fn();
+        category_fn();
 
-        category = $('.js-category-filter.active').attr('data-slug');
         search = $('#all-post-search').val();
         order = $('#js-post-order').val();
         this_load_more = $('.load_more_holder');
@@ -71,7 +90,6 @@ jQuery(function ($) {
             'post_type': posts_type,
             'pagination_type': pagination_type,
             'category': category,
-            'taxonomy_type': taxonomy_type,
             'search': search,
             'order': order,
             'more_classes': more_classes,
@@ -120,15 +138,30 @@ jQuery(function ($) {
     });
 
     $('.js-category-filter').on('click', function () {
-        if (!$(this).hasClass('active')) {
+        if ($(this).hasClass('multiply-false')) {
             $('.js-category-filter').removeClass('active');
             $(this).addClass('active')
         } else {
-            $('.js-category-filter').removeClass('active');
+            if (!$(this).hasClass('active')) {
+                $(this).addClass('active')
+            } else {
+                $(this).removeClass('active');
+            }
         }
+
+    })
+
+    $('.js-clear-filter').on('click', function () {
+        $('.js-category-filter').removeClass('active');
+        $('#all-post-search').val('');
+        $('.js-category-filter-select').prop("selectedIndex", 0);
     })
 
     $('#js-post-order').on('change', function () {
+        $('#all_posts_filter').trigger('submit');
+    })
+
+    $('.js-category-filter-select').on('change', function () {
         $('#all_posts_filter').trigger('submit');
     })
 
@@ -149,7 +182,11 @@ jQuery(function ($) {
                 if (data) {
                     this_load_more.remove();
                     row_items.empty();
-                    row_items.append(data.html);
+                    if (data.html != '') {
+                        row_items.append(data.html);
+                    } else {
+                        row_items.append('<div class="no-results-found">no results found</div>')
+                    }
                     ajax_row_holder.append(data.pagination);
                     ajax_row_holder.css("opacity", "1");
                 }

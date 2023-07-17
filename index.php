@@ -199,12 +199,21 @@ function all_posts_ajax()
 						<div class="hiddenFilter hidden">
 							<div class="flex flex-col gap-2.5">
 								<label for="filter_taxonomy" class="font-bold">Filter by category</label>
-								<select id="filter_taxonomy">
-									<option value="category">Post category</option>
+								<select id="filter_taxonomy" multiple>
+									<option selected value="category">Post category</option>
 									<?php foreach ($taxonomies as $taxonomy) {
 										echo '<option value="' . $taxonomy . '">' . ucfirst(str_replace(["_", "-"], " ", $taxonomy)) . '</option>';
+										print_r($taxonomy);
 									} ?>
 								</select>
+							</div>
+						</div>
+						<div class="hiddenFilter hidden">
+							<div class="flex flex-col gap-2.5">
+								<div class="flex flex-col gap-2.5">
+									<label for="enable_clear_button" class="font-bold cursor-pointer">Enable Clear Button</label>
+									<input id="enable_clear_button" class="!m-0" type="checkbox">
+								</div>
 							</div>
 						</div>
 						<div class="hiddenFilter hidden">
@@ -216,6 +225,23 @@ function all_posts_ajax()
 								       class="block min-h-[auto] w-full rounded !border border-[#aaa] !bg-white !px-3 !py-[0.64rem] !text-md !leading-[1.6] focus:!shadow-none outline-none transition-all duration-200 ease-linear "
 								       id="filter_row_classes"
 								       placeholder="filter_row"/>
+							</div>
+						</div>
+						<div class="hiddenFilter hidden">
+							<div class="flex flex-col gap-2.5">
+								<label for="filter_type" class="font-bold">Filter Type</label>
+								<select id="filter_type">
+									<option selected value="button">Button</option>
+									<option value="select">Select</option>
+								</select>
+							</div>
+						</div>
+						<div class="hiddenFilterType hidden">
+							<div class="flex flex-col gap-2.5">
+								<div class="flex flex-col gap-2.5">
+									<label for="multiply_filter_button" class="font-bold cursor-pointer">Enable Multiply Filter</label>
+									<input id="multiply_filter_button" class="!m-0" type="checkbox">
+								</div>
 							</div>
 						</div>
 						<div class="hiddenFilter hidden">
@@ -336,7 +362,10 @@ function all_posts_ajax_att($atts)
 		'row_classes' => 'posts_row',
 		'load_more_label' => 'Show more',
 		'load_more_classes' => 'load_more_button',
+		'enable_clear_button' => false,
 		'filter_by_category' => false,
+		'multiply_filter_button' => false,
+		'filter_type' => 'button',
 		'filter_row_classes' => 'filter_row',
 		'filter_item_classes' => 'filter_item',
 		'filter_taxonomy' => 'category',
@@ -361,7 +390,10 @@ function all_posts_ajax_att($atts)
 	$row_classes = $a['row_classes'];
 	$load_more_label = $a['load_more_label'];
 	$load_more_classes = $a['load_more_classes'];
+	$enable_clear_button = $a['enable_clear_button'];
 	$filter_by_category = $a['filter_by_category'];
+	$filter_type = $a['filter_type'];
+	$multiply_filter_button = $a['multiply_filter_button'];
 	$filter_row_classes = $a['filter_row_classes'];
 	$filter_item_classes = $a['filter_item_classes'];
 	$filter_taxonomy = $a['filter_taxonomy'];
@@ -377,7 +409,10 @@ function all_posts_ajax_att($atts)
 
 	$load_more_variables = array(
 		'load_more_label' => $load_more_label,
-		'filter_by_category'=> $filter_by_category,
+		'enable_clear_button' => $enable_clear_button,
+		'filter_by_category' => $filter_by_category,
+		'filter_type' => $filter_type,
+		'multiply_filter_button' => $multiply_filter_button,
 		'filter_row_classes' => $filter_row_classes,
 		'filter_item_classes' => $filter_item_classes,
 		'filter_taxonomy' => $filter_taxonomy,
@@ -436,7 +471,7 @@ function all_posts_ajax_att($atts)
 		wp_reset_postdata();
 	endif;
 
-	$results .= '<div class="ajax_row_holder"><div class="ajax_row ' . $row_classes . '" data-pagination-type="' . $type_pagination . '" data-posts-per-page="' . $posts_per_page . '" data-posts-type="' . $posts_type . '" data-taxonomy="' . $filter_taxonomy . '" data-more-classes="' . $load_more_classes . '" data-more-label="' . $load_more_label . '" data-prev-text="' . $prev_text . '" data-next-text="' . $next_text . '">';
+	$results .= '<div class="ajax_row_holder"><div class="ajax_row ' . $row_classes . '" data-pagination-type="' . $type_pagination . '" data-posts-per-page="' . $posts_per_page . '" data-posts-type="' . $posts_type . '" data-more-classes="' . $load_more_classes . '" data-more-label="' . $load_more_label . '" data-prev-text="' . $prev_text . '" data-next-text="' . $next_text . '">';
 	$results .= $posts_result;
 	$results .= '</div>';
 	$results .= $my_load_more_pagination;

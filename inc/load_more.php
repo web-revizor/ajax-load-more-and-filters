@@ -32,13 +32,12 @@ function loadmore_ajax_handler()
 	$wp_query_post_type = $_POST['post_type'];
 	$wp_query_posts_per_page = $_POST['posts_per_page'];
 	$wp_query_pagination_type = $_POST['pagination_type'];
-	$category_name = $_POST['category'];
-	$taxonomy_type = $_POST['taxonomy_type'];
+	$categories = $_POST['category'];
 	$load_more_classes = $_POST['more_classes'];
 	$load_more_label = $_POST['more_label'];
 	$prev_text = $_POST['prev_text'];
 	$next_text = $_POST['next_text'];
-	$tax_query[] = '';
+	$tax_query = array('relation' => 'AND');
 	$search = '';
 	$order = 'DESC';
 
@@ -50,18 +49,15 @@ function loadmore_ajax_handler()
 		$order = $_POST['order'];
 	}
 
-	if ($_POST['taxonomy_type'] === '') {
-		$taxonomy_type = 'category';
-	}
-
-	if ($category_name != '') {
-		$tax_query[] = array(
-			array(
-				'taxonomy' => $taxonomy_type,
+	if ($categories != '') {
+		foreach ($categories as $category => $value) :
+			$array = array(
+				'taxonomy' => $category,
 				'field' => 'slug',
-				'terms' => $category_name,
-			)
-		);
+				'terms' => $value,
+			);
+			$tax_query[] = $array;
+		endforeach;
 	}
 
 	$args = array(

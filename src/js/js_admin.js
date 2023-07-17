@@ -28,8 +28,11 @@ jQuery(function ($) {
             filter_row_classes_val = $('#filter_row_classes').val(),
             filter_item_classes_val = $('#filter_item_classes').val(),
             filter_taxonomy_val = $('#filter_taxonomy').val(),
+            filter_type_val = $('#filter_type').val(),
+            multiply_filter_button = '',
             all_category_button_val = $('#all_category_button').val(),
             filter_by_category = '',
+            enable_clear_button = '',
             enable_search = '',
             label_search_button_val = $('#label_search_button').val(),
             search_placeholder_val = $('#search_placeholder').val(),
@@ -61,6 +64,9 @@ jQuery(function ($) {
 
         if ($('#filter_by_category').is(':checked')) {
             filter_by_category = ' filter_by_category="true"';
+            if ($('#enable_clear_button').is(':checked')) {
+                enable_clear_button = ' enable_clear_button="true"';
+            }
             $('.hiddenFilter').show();
             if (filter_row_classes_val !== '') {
                 shortCodeArray.push(' filter_row_classes="' + filter_row_classes_val + '"')
@@ -70,6 +76,18 @@ jQuery(function ($) {
             }
             if (filter_taxonomy_val !== '') {
                 shortCodeArray.push(' filter_taxonomy="' + filter_taxonomy_val + '"')
+            }
+            if (filter_type_val !== '') {
+                shortCodeArray.push(' filter_type="' + filter_type_val + '"')
+            }
+            if (filter_type_val === 'button') {
+                $('.hiddenFilterType').show();
+                if ($('#multiply_filter_button').is(':checked')) {
+                    multiply_filter_button = ' multiply_filter_button="true"';
+                }
+                shortCodeArray.push(' filter_type="' + filter_type_val + '"')
+            } else {
+                $('.hiddenFilterType').hide();
             }
             if (all_category_button_val !== '') {
                 shortCodeArray.push(' all_category_button="' + all_category_button_val + '"')
@@ -106,7 +124,7 @@ jQuery(function ($) {
         }
         shortCodeArray = shortCodeArray.join('');
         shortCodeArray = shortCodeArray.toString();
-        $('#results_shortcode').val('[all_posts_ajax' + shortCodeArray + filter_by_category + enable_search + enable_order + ']')
+        $('#results_shortcode').val('[all_posts_ajax' + shortCodeArray + filter_by_category + multiply_filter_button + enable_clear_button + enable_search + enable_order + ']')
     }
 
     generateShortCode()
