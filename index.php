@@ -3,9 +3,9 @@
 Plugin Name:  All posts ajax
 Plugin URI:
 Description:  All posts ajax load more, search and filter
-Version:      0.9.8.6
+Version:      1.0
 Author: WebRevizor
-Author URI:
+Author URI: https://github.com/web-revizor/ajax-load-more-and-filters
 License:      GPL2
 License URI:
 Text Domain:  all-post-ajax-load-more
@@ -211,7 +211,8 @@ function all_posts_ajax()
 						<div class="hiddenFilter hidden">
 							<div class="flex flex-col gap-2.5">
 								<div class="flex flex-col gap-2.5">
-									<label for="enable_clear_button" class="font-bold cursor-pointer">Enable Clear Button</label>
+									<label for="enable_clear_button" class="font-bold cursor-pointer">Enable Clear
+										Button</label>
 									<input id="enable_clear_button" class="!m-0" type="checkbox">
 								</div>
 							</div>
@@ -239,7 +240,8 @@ function all_posts_ajax()
 						<div class="hiddenFilterType hidden">
 							<div class="flex flex-col gap-2.5">
 								<div class="flex flex-col gap-2.5">
-									<label for="multiply_filter_button" class="font-bold cursor-pointer">Enable Multiply Filter</label>
+									<label for="multiply_filter_button" class="font-bold cursor-pointer">Enable Multiply
+										Filter</label>
 									<input id="multiply_filter_button" class="!m-0" type="checkbox">
 								</div>
 							</div>
