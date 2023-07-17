@@ -123,9 +123,6 @@ jQuery(function ($) {
                     this_load_more.remove();
                     if (clearRow === true) {
                         row_items.empty();
-                        $('html,body').stop().animate({
-                            scrollTop: row_items.offset().top
-                        }, 300,);
                     }
                     row_items.append(data.html);
                     ajax_row_holder.append(data.pagination);
