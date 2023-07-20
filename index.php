@@ -3,7 +3,7 @@
 Plugin Name:  All posts ajax
 Plugin URI:
 Description:  All posts ajax load more, search and filter
-Version:      1.0.3
+Version:      1.1.0
 Author: WebRevizor
 Author URI: https://github.com/web-revizor/ajax-load-more-and-filters
 License:      GPL2
@@ -494,3 +494,8 @@ require_once dirname(__FILE__) . '/inc/custom_pagination.php';
  * Load more
  */
 require_once dirname(__FILE__) . '/inc/load_more.php';
+
+/**
+ * Search by ACF
+ */
+require_once dirname(__FILE__) . '/inc/search_by_acf/search_by_acf.php';
