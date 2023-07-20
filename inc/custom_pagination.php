@@ -179,9 +179,6 @@ function paginate_links_custom($args = '')
 	endif;
 
 	switch ($args['type']) {
-		case 'array':
-			return $page_links;
-
 		case 'list':
 			$r .= "<div id='pagination_holder' class='load_more_holder'>";
 			$r .= implode("\n", $page_links);

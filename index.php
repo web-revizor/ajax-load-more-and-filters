@@ -3,7 +3,7 @@
 Plugin Name:  All posts ajax
 Plugin URI:
 Description:  All posts ajax load more, search and filter
-Version:      1.0.2
+Version:      1.0.3
 Author: WebRevizor
 Author URI: https://github.com/web-revizor/ajax-load-more-and-filters
 License:      GPL2
@@ -57,7 +57,8 @@ function all_posts_ajax()
 		</h1>
 		<div>
 			<p class="text-base font-semibold inline-block p-5 bg-lightBlue rounded-md max-w-[80%]">
-				Edit a post-card.php in "<?= get_stylesheet_directory() . '/all_posts_ajax/' ?>"
+				Edit a post-card.php in
+				"<?= parse_url(get_stylesheet_directory_uri(), PHP_URL_PATH) . '/all_posts_ajax/' ?>"
 				<br/>
 				or create new {post-name}-card.php
 			</p>

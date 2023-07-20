@@ -21,30 +21,28 @@ Easy load more, filter and searching
 
 ### Shortcode Parameters (generate in admin panel)
 
-- post_type
-- posts_per_page
-- type_pagination
-- row_classes
-- load_more_label
-- load_more_classes
-- filter_by_category
-- filter_row_classes
-- filter_item_classes
-- filter_taxonomy
-- multiply_filter_button
-- enable_clear_button
-- filter_type
-- all_category_button
-- enable_search
-- label_search_button
-- search_placeholder
-- enable_order
-- label_newest_order
-- label_old_order
-- prev_text
-- next_text
-
-posts_per_page - can be "-1" for infinity posts on page
+- post_type: post type name
+- posts_per_page: number, can be "-1" for infinity posts on page
+- type_pagination: list/both/default/none
+- row_classes: string
+- load_more_label: string
+- load_more_classes: string
+- filter_by_category: boolean
+- filter_row_classes: string
+- filter_item_classes: string
+- filter_taxonomy: comma separated string with taxonomy name
+- multiply_filter_button: boolean
+- enable_clear_button: boolean
+- filter_type: button/select
+- all_category_button: string
+- enable_search: boolean
+- label_search_button: string
+- search_placeholder: string
+- enable_order: boolean
+- label_newest_order: string
+- label_old_order: string
+- prev_text: string
+- next_text: string
 
 ## JQuery events
 
