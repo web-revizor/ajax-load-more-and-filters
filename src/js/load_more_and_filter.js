@@ -13,7 +13,17 @@ jQuery(function ($) {
         search = '',
         order = '',
         this_load_more = '',
-        data = [];
+        data = [],
+        urlParams = new URLSearchParams(window.location.search),
+        first = true,
+        URLArray = '',
+        $select = $('.js-category-filter-select'),
+        $button = $('.js-category-filter'),
+        $form = $('#all_posts_filter'),
+        $search = $('#all-post-search'),
+        $order = $('#js-post-order'),
+        totalSelect = $select.length,
+        totalButton = $button.length;
 
     function posts_per_page_fn() {
         posts_per_page = row_items.attr('data-posts-per-page');
@@ -43,23 +53,22 @@ jQuery(function ($) {
         next_text = row_items.attr('data-next-text');
     }
 
+
     function category_fn() {
         category = {};
-        var URLArray = '';
-        var first = true;
+        URLArray = '';
+        first = true;
         if ($('button').hasClass('js-category-filter')) {
             $('.js-category-filter.active').each(function () {
                 if (!$(this).hasClass('allCategories')) {
                     var taxonomy = $(this).attr('data-taxonomy');
                     var slug = $(this).attr('data-slug');
-
                     category[taxonomy] = category[taxonomy] && Array.isArray(category[taxonomy]) ? [...category[taxonomy], slug] : [slug]
-
                 }
             })
         }
         if ($('select').hasClass('js-category-filter-select')) {
-            $('.js-category-filter-select').each(function () {
+            $select.each(function () {
                 if ($(this).val()) {
                     var taxonomy = $(this).attr('data-taxonomy');
                     var slug = $(this).val();
@@ -75,7 +84,7 @@ jQuery(function ($) {
                 URLArray += '&' + i + '=' + v;
             }
         })
-        window.history.pushState(null, null, '?' + URLArray);
+
     }
 
     function all_param() {
@@ -88,9 +97,20 @@ jQuery(function ($) {
         next_text_fn();
         category_fn();
 
-        search = $('#all-post-search').val();
-        order = $('#js-post-order').val();
+        search = $search.val();
+        order = $order.val();
         this_load_more = $('.load_more_holder');
+
+        if (search != '') {
+            if (first) {
+                URLArray += 'filter_search=' + search;
+                first = false;
+            } else {
+                URLArray += '&filter_search=' + search;
+            }
+        }
+
+        window.history.pushState(null, null, '?' + URLArray);
 
         data = {
             'action': 'loadmore',
@@ -107,6 +127,15 @@ jQuery(function ($) {
             'prev_text': prev_text,
             'next_text': next_text,
         };
+    }
+
+    function URL_Param() {
+        if (urlParams.has('filter_search')) {
+            $search.val(urlParams.get('filter_search'));
+            $form.trigger('submit');
+        } else {
+            $form.trigger('submit');
+        }
     }
 
     $(document).on('click', '#pagination_holder .load_page', function (e) {
@@ -144,9 +173,9 @@ jQuery(function ($) {
         });
     });
 
-    $('.js-category-filter').on('click', function () {
+    $button.on('click', function () {
         if ($(this).hasClass('multiply-false')) {
-            $('.js-category-filter').removeClass('active');
+            $button.removeClass('active');
             $(this).addClass('active')
         } else {
             if (!$(this).hasClass('active')) {
@@ -159,20 +188,20 @@ jQuery(function ($) {
     })
 
     $('.js-clear-filter').on('click', function () {
-        $('.js-category-filter').removeClass('active');
-        $('#all-post-search').val('');
-        $('.js-category-filter-select').prop("selectedIndex", 0);
+        $button.removeClass('active');
+        $search.val('');
+        $select.prop("selectedIndex", 0);
     })
 
-    $('#js-post-order').on('change', function () {
-        $('#all_posts_filter').trigger('submit');
+    $order.on('change', function () {
+        $form.trigger('submit');
     })
 
-    $('.js-category-filter-select').on('change', function () {
-        $('#all_posts_filter').trigger('submit');
+    $select.on('change', function () {
+        $form.trigger('submit');
     })
 
-    $('#all_posts_filter').on('submit', function (e) {
+    $form.on('submit', function (e) {
         e.preventDefault()
         loadmore_params.current_page = 1;
 
@@ -203,23 +232,19 @@ jQuery(function ($) {
         });
     });
 
-    var urlParams = new URLSearchParams(window.location.search); //get all parameters
 
-    var indexFilters = 1;
-
-    $('.js-category-filter-select').each(function () {
+    $select.each(function (index) {
         var taxonomy = $(this).attr('data-taxonomy');
-        indexFilters++;
         if (urlParams.has(taxonomy)) {
             $(this).val(urlParams.get(taxonomy));
-            if (indexFilters === $('.js-category-filter-select').length) {
-                $('#all_posts_filter').trigger('submit');
-                indexFilters = 1;
-            }
+        }
+        if (index === totalSelect - 1) {
+            URL_Param()
         }
     })
 
-    $('.js-category-filter').each(function () {
+
+    $button.each(function (index) {
         if (!$(this).hasClass('allCategories')) {
             var taxonomy = $(this).attr('data-taxonomy');
             var slug = $(this).attr('data-slug');
@@ -229,16 +254,13 @@ jQuery(function ($) {
 
                 $.each(array, function (i, v) {
                     if (v === slug) {
-                        console.log($this)
                         $this.addClass('active');
                     }
                 })
             }
         }
-        if (indexFilters === $('.js-category-filter').length) {
-            $('#all_posts_filter').trigger('submit');
-            indexFilters = 1;
+        if (index === totalButton - 1) {
+            URL_Param()
         }
-        indexFilters++;
     })
 });
