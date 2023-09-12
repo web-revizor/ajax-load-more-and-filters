@@ -45,6 +45,8 @@ jQuery(function ($) {
 
     function category_fn() {
         category = {};
+        var URLArray = '';
+        var first = true;
         if ($('button').hasClass('js-category-filter')) {
             $('.js-category-filter.active').each(function () {
                 if (!$(this).hasClass('allCategories')) {
@@ -52,6 +54,7 @@ jQuery(function ($) {
                     var slug = $(this).attr('data-slug');
 
                     category[taxonomy] = category[taxonomy] && Array.isArray(category[taxonomy]) ? [...category[taxonomy], slug] : [slug]
+
                 }
             })
         }
@@ -60,12 +63,19 @@ jQuery(function ($) {
                 if ($(this).val()) {
                     var taxonomy = $(this).attr('data-taxonomy');
                     var slug = $(this).val();
-
                     category[taxonomy] = category[taxonomy] && Array.isArray(category[taxonomy]) ? [...category[taxonomy], slug] : [slug]
                 }
-
             })
         }
+        $.each(category, function (i, v) {
+            if (first) {
+                URLArray += i + '=' + v;
+                first = false;
+            } else {
+                URLArray += '&' + i + '=' + v;
+            }
+        })
+        window.history.pushState(null, null, '?' + URLArray);
     }
 
     function all_param() {
@@ -192,4 +202,43 @@ jQuery(function ($) {
             $(document).trigger('AjaxFilterDone');
         });
     });
+
+    var urlParams = new URLSearchParams(window.location.search); //get all parameters
+
+    var indexFilters = 1;
+
+    $('.js-category-filter-select').each(function () {
+        var taxonomy = $(this).attr('data-taxonomy');
+        indexFilters++;
+        if (urlParams.has(taxonomy)) {
+            $(this).val(urlParams.get(taxonomy));
+            if (indexFilters === $('.js-category-filter-select').length) {
+                $('#all_posts_filter').trigger('submit');
+                indexFilters = 1;
+            }
+        }
+    })
+
+    $('.js-category-filter').each(function () {
+        if (!$(this).hasClass('allCategories')) {
+            var taxonomy = $(this).attr('data-taxonomy');
+            var slug = $(this).attr('data-slug');
+            var $this = $(this);
+            if (urlParams.has(taxonomy)) {
+                var array = urlParams.get(taxonomy).split(',');
+
+                $.each(array, function (i, v) {
+                    if (v === slug) {
+                        console.log($this)
+                        $this.addClass('active');
+                    }
+                })
+            }
+        }
+        if (indexFilters === $('.js-category-filter').length) {
+            $('#all_posts_filter').trigger('submit');
+            indexFilters = 1;
+        }
+        indexFilters++;
+    })
 });
