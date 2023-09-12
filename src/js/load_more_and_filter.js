@@ -23,7 +23,8 @@ jQuery(function ($) {
         $search = $('#all-post-search'),
         $order = $('#js-post-order'),
         totalSelect = $select.length,
-        totalButton = $button.length;
+        totalButton = $button.length,
+        filterCheck = false;
 
     function posts_per_page_fn() {
         posts_per_page = row_items.attr('data-posts-per-page');
@@ -109,7 +110,6 @@ jQuery(function ($) {
                 URLArray += '&filter_search=' + search;
             }
         }
-
         window.history.pushState(null, null, '?' + URLArray);
 
         data = {
@@ -237,8 +237,9 @@ jQuery(function ($) {
         var taxonomy = $(this).attr('data-taxonomy');
         if (urlParams.has(taxonomy)) {
             $(this).val(urlParams.get(taxonomy));
+            filterCheck = true;
         }
-        if (index === totalSelect - 1) {
+        if (index === totalSelect - 1 && filterCheck) {
             URL_Param()
         }
     })
@@ -255,11 +256,12 @@ jQuery(function ($) {
                 $.each(array, function (i, v) {
                     if (v === slug) {
                         $this.addClass('active');
+                        filterCheck = true;
                     }
                 })
             }
         }
-        if (index === totalButton - 1) {
+        if (index === totalButton - 1 && filterCheck) {
             URL_Param()
         }
     })
