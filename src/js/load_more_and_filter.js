@@ -24,7 +24,8 @@ jQuery(function ($) {
         $order = $('#js-post-order'),
         totalSelect = $select.length,
         totalButton = $button.length,
-        filterCheck = false;
+        filterCheck = false,
+        searchCheck = false;
 
     function posts_per_page_fn() {
         posts_per_page = row_items.attr('data-posts-per-page');
@@ -102,7 +103,7 @@ jQuery(function ($) {
         order = $order.val();
         this_load_more = $('.load_more_holder');
 
-        if (search != '') {
+        if (search !== '') {
             if (first) {
                 URLArray += 'filter_search=' + search;
                 first = false;
@@ -129,13 +130,11 @@ jQuery(function ($) {
         };
     }
 
-    function URL_Param() {
-        if (urlParams.has('filter_search')) {
-            $search.val(urlParams.get('filter_search'));
-            $form.trigger('submit');
-        } else {
-            $form.trigger('submit');
-        }
+    if (urlParams.has('filter_search')) {
+        $search.val(urlParams.get('filter_search'));
+        searchCheck = true;
+    } else {
+        searchCheck = false;
     }
 
     $(document).on('click', '#pagination_holder .load_page', function (e) {
@@ -203,6 +202,7 @@ jQuery(function ($) {
 
     $form.on('submit', function (e) {
         e.preventDefault()
+
         loadmore_params.current_page = 1;
 
         all_param();
@@ -240,7 +240,7 @@ jQuery(function ($) {
             filterCheck = true;
         }
         if (index === totalSelect - 1 && filterCheck) {
-            URL_Param()
+            $form.trigger('submit');
         }
     })
 
@@ -262,7 +262,12 @@ jQuery(function ($) {
             }
         }
         if (index === totalButton - 1 && filterCheck) {
-            URL_Param()
+            $form.trigger('submit');
         }
     })
+
+
+    if (!filterCheck && searchCheck) {
+        $form.trigger('submit');
+    }
 });
