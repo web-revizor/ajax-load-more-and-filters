@@ -67,7 +67,19 @@ function loadmore_ajax_handler()
 		'tax_query' => $tax_query,
 		'order' => $order,
 		'paged' => absint($_POST['page']),
-		's' => $search
+		's' => $search,
+		'meta_query' => array(
+			'relation' => 'OR',
+			array(
+				'key' => 'all_posts_ajax_hide',
+				'value' => '1',
+				'compare' => '!='
+			),
+			array(
+				'key' => 'all_posts_ajax_hide',
+				'compare' => 'NOT EXISTS'
+			),
+		),
 	);
 
 	$wp_query = new WP_Query($args);

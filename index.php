@@ -3,7 +3,7 @@
 Plugin Name:  All posts ajax
 Plugin URI:
 Description:  All posts ajax load more, search and filter
-Version:      1.1.4
+Version:      1.1.5
 Author: WebRevizor
 Author URI: https://github.com/web-revizor/ajax-load-more-and-filters
 License:      GPL2
@@ -37,6 +37,58 @@ function all_post_ajax_admin($hook_suffix)
 }
 
 add_action('admin_enqueue_scripts', 'all_post_ajax_admin');
+
+
+add_action('add_meta_boxes', 'myplugin_add_custom_box');
+function myplugin_add_custom_box()
+{
+	$args = array(
+		'public' => true,
+		'_builtin' => false
+	);
+	$output = 'names';
+	$operator = 'and';
+	$screens = get_post_types($args, $output, $operator);
+	$screens[] = 'post';
+	add_meta_box('myplugin_sectionid', 'All Posts Ajax', 'all_posts_ajax_meta_box_callback', $screens, 'side', 'high');
+}
+
+function all_posts_ajax_meta_box_callback($post, $meta)
+{
+	$screens = $meta['args'];
+
+	wp_nonce_field(plugin_basename(__FILE__), 'myplugin_noncename');
+
+	$value = get_post_meta($post->ID, 'all_posts_ajax_hide', true);
+	?>
+
+
+	<label for="all_posts_ajax_hide">
+		<input type="checkbox" id="all_posts_ajax_hide"
+		       name="all_posts_ajax_hide" <?= $value ? 'checked' : '' ?>/>
+		Hide from list
+	</label>
+	<?php
+}
+
+
+add_action('save_post', 'all_posts_ajax_save_postdata');
+function all_posts_ajax_save_postdata($post_id)
+{
+	if (!wp_verify_nonce($_POST['myplugin_noncename'], plugin_basename(__FILE__)))
+		return;
+
+	if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE)
+		return;
+
+	if (!current_user_can('edit_post', $post_id))
+		return;
+
+	$my_data = $_POST['all_posts_ajax_hide'] ? '1' : '0';
+
+	update_post_meta($post_id, 'all_posts_ajax_hide', $my_data);
+}
+
 
 function all_posts_ajax()
 {
@@ -433,6 +485,18 @@ function all_posts_ajax_att($atts)
 		'post_type' => $posts_type,
 		'posts_per_page' => $posts_per_page,
 		'paged' => get_query_var('paged') ? get_query_var('paged') : 1,
+		'meta_query' => array(
+			'relation' => 'OR',
+			array(
+				'key' => 'all_posts_ajax_hide',
+				'value' => '1',
+				'compare' => '!='
+			),
+			array(
+				'key' => 'all_posts_ajax_hide',
+				'compare' => 'NOT EXISTS'
+			),
+		),
 	);
 	$posts_result = '';
 	$my_load_more_pagination = '';
