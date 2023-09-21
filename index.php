@@ -26,7 +26,8 @@ if (!is_dir(get_stylesheet_directory() . '/all_posts_ajax')) {
 if (!is_file(get_stylesheet_directory() . '/all_posts_ajax/post-card.php')) {
 	fopen(get_stylesheet_directory() . '/all_posts_ajax/post-card.php', 'w');
 }
-
+$plugin_all_ajax_dir = WP_PLUGIN_DIR . '/ajax-load-more-and-filters';
+global $plugin_all_ajax_dir;
 /**
  * Shortcode
  */

@@ -6,6 +6,7 @@
 
 function all_posts_ajax_att($atts)
 {
+	global $plugin_all_ajax_dir;
 	$default = array(
 		'post_type' => 'post',
 		'posts_per_page' => '10',
@@ -102,11 +103,11 @@ function all_posts_ajax_att($atts)
 
 
 	if ($filter_by_category === 'true' || $enable_search === 'true') {
-		require_once dirname(__FILE__) . '/inc/filter/filter.php';
+		require_once $plugin_all_ajax_dir . '/inc/filter/filter.php';
 	}
 
 	if ($enable_order === 'true') {
-		require_once dirname(__FILE__) . '/inc/order/order.php';
+		require_once $plugin_all_ajax_dir . '/inc/order/order.php';
 	}
 
 	if ($wp_query->have_posts()):
