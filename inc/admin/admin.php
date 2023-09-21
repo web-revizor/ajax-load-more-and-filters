@@ -16,6 +16,7 @@ function all_posts_ajax()
 
 
 	$taxonomies = get_taxonomies($args, $output, $operator);
+	global $plugin_all_ajax_dir;
 	?>
 	<div class="flex flex-col gap-5">
 		<h1 class="font-bold text-30 mt-5">
