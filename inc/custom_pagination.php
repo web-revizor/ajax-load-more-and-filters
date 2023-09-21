@@ -1,4 +1,9 @@
 <?php
+
+/**
+ * Custom pagination
+ */
+
 function paginate_links_custom($args = '')
 {
 	global $wp_query, $wp_rewrite;

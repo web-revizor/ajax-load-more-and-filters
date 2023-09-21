@@ -1,8 +1,7 @@
 <?php
 
 /**
- * Load more posts
- *
+ * Load more
  */
 
 function my_load_more_scripts()
