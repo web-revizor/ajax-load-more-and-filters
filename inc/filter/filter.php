@@ -26,7 +26,11 @@ global $load_more_variables;
 					$categories = get_terms($categories, array(
 						'parent' => 0
 					)); ?>
+					<?php if ($categories): ?>
+						<p class="filterHeading"><?php echo $taxonomy ?></p>
+					<?php endif; ?>
 					<?php foreach ($categories as $category) : ?>
+
 						<?php
 						$childrensCat = get_terms($category->taxonomy, array(
 							'parent' => $category->term_id,
