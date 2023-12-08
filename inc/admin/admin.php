@@ -205,6 +205,15 @@ function all_posts_ajax()
 								</select>
 							</div>
 						</div>
+						<div class="hiddenFilter hidden">
+							<div class="flex flex-col gap-2.5">
+								<div class="flex flex-col gap-2.5">
+									<label for="enable_filter_titles" class="font-bold cursor-pointer">Enable Filter
+										Titles</label>
+									<input id="enable_filter_titles" class="!m-0" type="checkbox">
+								</div>
+							</div>
+						</div>
 						<div class="hiddenFilterType hidden">
 							<div class="flex flex-col gap-2.5">
 								<div class="flex flex-col gap-2.5">
@@ -313,9 +322,15 @@ function all_posts_ajax()
 				       readonly>
 			</div>
 			<button type="button" title="Copy"
-			        class="js-click-to-copy-link flex items-center justify-center cursor-pointer !outline-none [&_svg]:fill-gray [&_svg]:transition [&_svg]:duration-300 hover:[&_svg]:fill-blue">
-				<svg width="25" height="25" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+			        class="js-click-to-copy-link flex items-center justify-center cursor-pointer !outline-none">
+				<svg class="copyIcon fill-gray transition duration-300 hover:fill-blue" width="25" height="25"
+				     xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
 					<path d="M224 0c-35.3 0-64 28.7-64 64V288c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V64c0-35.3-28.7-64-64-64H224zM64 160c-35.3 0-64 28.7-64 64V448c0 35.3 28.7 64 64 64H288c35.3 0 64-28.7 64-64V384H288v64H64V224h64V160H64z"/>
+				</svg>
+				<svg class="hidden copiedIcon" xmlns="http://www.w3.org/2000/svg" width="25" height="25"
+				     viewBox="0 0 24 24" fill="none">
+					<path d="M4 12.611 8.923 17.5 20 6.5" stroke="#00ff40" stroke-width="2" stroke-linecap="round"
+					      stroke-linejoin="round"/>
 				</svg>
 			</button>
 		</div>

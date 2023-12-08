@@ -1,6 +1,9 @@
 //= ../../node_modules/select2/dist/js/select2.min.js
 
 jQuery(function ($) {
+  const copyIcon = $('.copyIcon'),
+    copyedIcon = $('.copiedIcon');
+
   $('.js-tabs-list a').on('click', function () {
     if (!$(this).hasClass('active')) {
       let target = $(this).attr('href');
@@ -29,6 +32,7 @@ jQuery(function ($) {
       filter_item_classes_val = $('#filter_item_classes').val(),
       filter_taxonomy_val = $('#filter_taxonomy').val(),
       filter_type_val = $('#filter_type').val(),
+      filter_titles = '',
       multiply_filter_button = '',
       all_category_button_val = $('#all_category_button').val(),
       filter_by_category = '',
@@ -93,6 +97,9 @@ jQuery(function ($) {
       if (filter_type_val !== '') {
         shortCodeArray.push(' filter_type="' + filter_type_val + '"');
       }
+      if ($('#enable_filter_titles').is(':checked')) {
+        filter_titles = ' filter_titles="true"';
+      }
       if (filter_type_val === 'button') {
         $('.hiddenFilterType').show();
         if ($('#multiply_filter_button').is(':checked')) {
@@ -153,6 +160,7 @@ jQuery(function ($) {
         enable_clear_button +
         enable_search +
         enable_order +
+        filter_titles +
         ']'
     );
   }
@@ -171,6 +179,8 @@ jQuery(function ($) {
       document.queryCommandSupported &&
       document.queryCommandSupported('copy')
     ) {
+      copyIcon.hide();
+      copyedIcon.show();
       let textarea = document.createElement('textarea');
       textarea.textContent = text;
       textarea.style.position = 'absolute'; // Prevent scrolling to bottom of page in MS Edge.
@@ -179,11 +189,19 @@ jQuery(function ($) {
       document.body.appendChild(textarea);
       textarea.select();
       try {
+        setTimeout(function () {
+          copyIcon.show();
+          copyedIcon.hide();
+        }, 1000);
         return document.execCommand('copy'); // Security exception may be thrown by some browsers.
       } catch (ex) {
         console.warn('Copy to clipboard failed.', ex);
         return false;
       } finally {
+        setTimeout(function () {
+          copyIcon.show();
+          copyedIcon.hide();
+        }, 1000);
         document.body.removeChild(textarea);
       }
     }

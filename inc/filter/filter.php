@@ -23,11 +23,12 @@ global $load_more_variables;
 				<?php foreach ($categoriesArray as $categories) : ?>
 					<?php
 					$taxonomy = $categories;
+					$name = get_taxonomy($taxonomy);
 					$categories = get_terms($categories, array(
 						'parent' => 0
 					)); ?>
-					<?php if ($categories): ?>
-						<p class="filterHeading"><?php echo $taxonomy ?></p>
+					<?php if ($categories && $load_more_variables['filter_titles'] === 'true'): ?>
+						<p class="filterHeading"><?= $name->label ?></p>
 					<?php endif; ?>
 					<?php foreach ($categories as $category) : ?>
 

@@ -18,6 +18,7 @@ function all_posts_ajax_att($atts)
 		'filter_by_category' => false,
 		'multiply_filter_button' => 'false',
 		'filter_type' => 'button',
+		'filter_titles' => false,
 		'filter_row_classes' => 'filter_row',
 		'filter_item_classes' => 'filter_item',
 		'filter_taxonomy' => 'category',
@@ -45,6 +46,7 @@ function all_posts_ajax_att($atts)
 	$enable_clear_button = $a['enable_clear_button'];
 	$filter_by_category = $a['filter_by_category'];
 	$filter_type = $a['filter_type'];
+	$filter_titles = $a['filter_titles'];
 	$multiply_filter_button = $a['multiply_filter_button'];
 	$filter_row_classes = $a['filter_row_classes'];
 	$filter_item_classes = $a['filter_item_classes'];
@@ -64,6 +66,7 @@ function all_posts_ajax_att($atts)
 		'enable_clear_button' => $enable_clear_button,
 		'filter_by_category' => $filter_by_category,
 		'filter_type' => $filter_type,
+		'filter_titles' => $filter_titles,
 		'multiply_filter_button' => $multiply_filter_button,
 		'filter_row_classes' => $filter_row_classes,
 		'filter_item_classes' => $filter_item_classes,

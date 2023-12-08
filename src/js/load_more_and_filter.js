@@ -115,7 +115,9 @@ jQuery(function ($) {
         URLArray += '&filter_search=' + search;
       }
     }
-    window.history.pushState(null, null, '?' + URLArray);
+    if (URLArray !== '') {
+      window.history.pushState(null, null, '?' + URLArray);
+    }
 
     data = {
       action: 'loadmore',
