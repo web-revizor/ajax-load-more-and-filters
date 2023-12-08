@@ -34,6 +34,7 @@ Easy load more, filter and searching
 - multiply_filter_button: boolean
 - enable_clear_button: boolean
 - filter_type: button/select
+- filter_titles: boolean
 - all_category_button: string
 - enable_search: boolean
 - label_search_button: string
