@@ -117,6 +117,10 @@ jQuery(function ($) {
     }
     if (URLArray !== '') {
       window.history.pushState(null, null, '?' + URLArray);
+    } else {
+      var clean_uri =
+        location.protocol + '//' + location.host + location.pathname;
+      window.history.pushState(null, null, clean_uri);
     }
 
     data = {
