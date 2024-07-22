@@ -39,16 +39,17 @@ function all_posts_ajax_meta_box_callback($post, $meta)
 add_action('save_post', 'all_posts_ajax_save_postdata');
 function all_posts_ajax_save_postdata($post_id)
 {
-	if (!wp_verify_nonce($_POST['myplugin_noncename'], plugin_basename(__FILE__)))
-		return;
+    // Перевірка на існування ключа 'myplugin_noncename'
+    if (!isset($_POST['myplugin_noncename']) || !wp_verify_nonce($_POST['myplugin_noncename'], plugin_basename(__FILE__)))
+        return;
 
-	if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE)
-		return;
+    if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE)
+        return;
 
-	if (!current_user_can('edit_post', $post_id))
-		return;
+    if (!current_user_can('edit_post', $post_id))
+        return;
 
-	$my_data = $_POST['all_posts_ajax_hide'] ? '1' : '0';
+    $my_data = isset($_POST['all_posts_ajax_hide']) && $_POST['all_posts_ajax_hide'] ? '1' : '0';
 
-	update_post_meta($post_id, 'all_posts_ajax_hide', $my_data);
+    update_post_meta($post_id, 'all_posts_ajax_hide', $my_data);
 }
