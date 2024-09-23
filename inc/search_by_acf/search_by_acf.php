@@ -80,7 +80,7 @@ function advanced_custom_search($where, $wp_query)
 {
     global $wpdb;
 
-    if (empty($where))
+    if (empty($where) || is_admin())
         return $where;
 
     // get search expression
@@ -94,12 +94,10 @@ function advanced_custom_search($where, $wp_query)
     // reset search in order to rebuilt it as we whish
     $where = '';
     $result = $wpdb->get_results("SELECT * FROM `$wpdb->prefix`ajax_load_more_and_filters");
-    if ($result && !empty($result[0]->ACF_FIELDS)) {
-        $result = json_decode(json_encode($result[0]->ACF_FIELDS), true);
-        $list_searcheable_acf = explode(', ', $result);
-    } else {
-        $list_searcheable_acf = []; // Пустий масив, якщо немає результатів
-    }
+    $result = json_decode(json_encode($result[0]->ACF_FIELDS), true);
+    $result = explode(', ', $result);
+    // get searcheable_acf, a list of advanced custom fields you want to search content in
+    $list_searcheable_acf = $result;
     foreach ($exploded as $tag) :
         $where .= " 
           AND (
