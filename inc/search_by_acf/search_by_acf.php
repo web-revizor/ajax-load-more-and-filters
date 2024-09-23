@@ -7,56 +7,56 @@
 function loadmore_search_acf_table()
 {
 
-	global $wpdb;
+    global $wpdb;
 
-	$table_name = $wpdb->prefix . "ajax_load_more_and_filters";
+    $table_name = $wpdb->prefix . "ajax_load_more_and_filters";
 
-	$charset_collate = $wpdb->get_charset_collate();
-	$dataBaseName = DB_NAME;
-	$sql = "DROP TABLE `$dataBaseName`.`$table_name`";
+    $charset_collate = $wpdb->get_charset_collate();
+    $dataBaseName = DB_NAME;
+    $sql = "DROP TABLE `$dataBaseName`.`$table_name`";
 
-	$wpdb->query($sql);
+    $wpdb->query($sql);
 
-	$sql = "CREATE TABLE IF NOT EXISTS $table_name (
+    $sql = "CREATE TABLE IF NOT EXISTS $table_name (
       id bigint(20) NOT NULL AUTO_INCREMENT,
       ACF_FIELDS mediumtext NOT NULL,
       PRIMARY KEY id (id)
     ) $charset_collate;";
 
-	require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-	dbDelta($sql);
+    require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+    dbDelta($sql);
 
 
-	$args = array(
-		'public' => true,
-		'_builtin' => false
-	);
-	$output = 'names';
-	$operator = 'and';
-	$post_types = get_post_types($args, $output, $operator);
-	$array = array();
-	foreach ($post_types as $post_type) {
-		$groups = acf_get_field_groups(array('post_type' => $post_type));
-		foreach ($groups as $item) {
-			$groups = acf_get_fields($item['key']);
-			print_r($item['name']);
-			foreach ($groups as $item) {
-				$array[] = $item['name'];
-			}
-		}
-	}
-	$array = array_unique($array);
-	$array = implode(', ', $array);
+    $args = array(
+        'public' => true,
+        '_builtin' => false
+    );
+    $output = 'names';
+    $operator = 'and';
+    $post_types = get_post_types($args, $output, $operator);
+    $array = array();
+    foreach ($post_types as $post_type) {
+        $groups = acf_get_field_groups(array('post_type' => $post_type));
+        foreach ($groups as $item) {
+            $groups = acf_get_fields($item['key']);
+            print_r($item['name']);
+            foreach ($groups as $item) {
+                $array[] = $item['name'];
+            }
+        }
+    }
+    $array = array_unique($array);
+    $array = implode(', ', $array);
 
-	$table_name = $wpdb->prefix . 'ajax_load_more_and_filters';
+    $table_name = $wpdb->prefix . 'ajax_load_more_and_filters';
 
-	$wpdb_quantity = json_encode($array);
+    $wpdb_quantity = json_encode($array);
 
-	$query = "INSERT INTO $table_name (id, ACF_FIELDS) VALUES (%s, %s)";
+    $query = "INSERT INTO $table_name (id, ACF_FIELDS) VALUES (%s, %s)";
 
-	$prepare_query = $wpdb->prepare($query, '1', $wpdb_quantity);
+    $prepare_query = $wpdb->prepare($query, '1', $wpdb_quantity);
 
-	$wpdb->query($prepare_query);
+    $wpdb->query($prepare_query);
 }
 
 add_action('acf/save_post', 'loadmore_search_acf_table');
@@ -78,28 +78,30 @@ add_action('acf/save_post', 'loadmore_search_acf_table');
  */
 function advanced_custom_search($where, $wp_query)
 {
-	global $wpdb;
+    global $wpdb;
 
-	if (empty($where))
-		return $where;
+    if (empty($where))
+        return $where;
 
-	// get search expression
-	$terms = $wp_query->query_vars['s'];
+    // get search expression
+    $terms = $wp_query->query_vars['s'];
 
-	// explode search expression to get search terms
-	$exploded = explode(' ', $terms);
-	if ($exploded === FALSE || count($exploded) == 0)
-		$exploded = array(0 => $terms);
+    // explode search expression to get search terms
+    $exploded = explode(' ', $terms);
+    if ($exploded === FALSE || count($exploded) == 0)
+        $exploded = array(0 => $terms);
 
-	// reset search in order to rebuilt it as we whish
-	$where = '';
-	$result = $wpdb->get_results("SELECT * FROM `$wpdb->prefix`ajax_load_more_and_filters");
-	$result = json_decode(json_encode($result[0]->ACF_FIELDS), true);
-	$result = explode(', ', $result);
-	// get searcheable_acf, a list of advanced custom fields you want to search content in
-	$list_searcheable_acf = $result;
-	foreach ($exploded as $tag) :
-		$where .= " 
+    // reset search in order to rebuilt it as we whish
+    $where = '';
+    $result = $wpdb->get_results("SELECT * FROM `$wpdb->prefix`ajax_load_more_and_filters");
+    if ($result && !empty($result[0]->ACF_FIELDS)) {
+        $result = json_decode(json_encode($result[0]->ACF_FIELDS), true);
+        $list_searcheable_acf = explode(', ', $result);
+    } else {
+        $list_searcheable_acf = []; // Пустий масив, якщо немає результатів
+    }
+    foreach ($exploded as $tag) :
+        $where .= " 
           AND (
             (wp_posts.post_title LIKE '%$tag%')
             OR (wp_posts.post_content LIKE '%$tag%')
@@ -107,14 +109,14 @@ function advanced_custom_search($where, $wp_query)
               SELECT * FROM wp_postmeta
                   WHERE post_id = wp_posts.ID
                     AND (";
-		foreach ($list_searcheable_acf as $searcheable_acf) :
-			if ($searcheable_acf == $list_searcheable_acf[0]):
-				$where .= " (meta_key LIKE '%" . $searcheable_acf . "%' AND meta_value LIKE '%$tag%') ";
-			else :
-				$where .= " OR (meta_key LIKE '%" . $searcheable_acf . "%' AND meta_value LIKE '%$tag%') ";
-			endif;
-		endforeach;
-		$where .= ")
+        foreach ($list_searcheable_acf as $searcheable_acf) :
+            if ($searcheable_acf == $list_searcheable_acf[0]):
+                $where .= " (meta_key LIKE '%" . $searcheable_acf . "%' AND meta_value LIKE '%$tag%') ";
+            else :
+                $where .= " OR (meta_key LIKE '%" . $searcheable_acf . "%' AND meta_value LIKE '%$tag%') ";
+            endif;
+        endforeach;
+        $where .= ")
             )
             OR EXISTS (
               SELECT * FROM wp_comments
@@ -136,8 +138,8 @@ function advanced_custom_search($where, $wp_query)
                 AND wp_terms.name LIKE '%$tag%'
             )
         )";
-	endforeach;
-	return $where;
+    endforeach;
+    return $where;
 }
 
 add_filter('posts_search', 'advanced_custom_search', 500, 2);
