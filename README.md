@@ -27,11 +27,18 @@ Easy load more, filter and searching
 - row_classes: string
 - load_more_label: string
 - load_more_classes: string
+- prev_text: string
+- next_text: string
+
+
 - filter_by_category: boolean
 - filter_row_classes: string
 - filter_item_classes: string
+- filter_item_limit: number
+- filter_expand_label: string
+- filter_expand_class: string
 - filter_taxonomy: comma separated string with taxonomy name
-- multiply_filter_button: boolean
+- multiply_filter: boolean
 - enable_clear_button: boolean
 - filter_type: button/select
 - filter_titles: boolean
@@ -42,8 +49,6 @@ Easy load more, filter and searching
 - enable_order: boolean
 - label_newest_order: string
 - label_old_order: string
-- prev_text: string
-- next_text: string
 
 ## JQuery events
 
@@ -53,7 +58,7 @@ Easy load more, filter and searching
 ### Example
 
 ````
-$(document).on('AjaxFilterDone', function() {
+$(document).on('AjaxPaginationDone', function() {
     //do something
 });
 

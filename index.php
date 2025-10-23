@@ -3,7 +3,7 @@
 Plugin Name:  All posts ajax
 Plugin URI:
 Description:  All posts ajax load more, search and filter
-Version:      1.2.1
+Version:      1.3.0
 Author: WebRevizor
 Author URI: https://github.com/web-revizor/ajax-load-more-and-filters
 License:      GPL2
@@ -15,16 +15,16 @@ add_action('admin_menu', 'all_posts_ajax_setup_menu');
 
 function all_posts_ajax_setup_menu()
 {
-	add_menu_page('All Posts AJAX', 'All Posts AJAX', 'manage_options', 'all-posts-ajax', 'all_posts_ajax');
+    add_menu_page('All Posts AJAX', 'All Posts AJAX', 'manage_options', 'all-posts-ajax', 'all_posts_ajax');
 }
 
 
 if (!is_dir(get_stylesheet_directory() . '/all_posts_ajax')) {
-	wp_mkdir_p(get_stylesheet_directory() . '/all_posts_ajax');
+    wp_mkdir_p(get_stylesheet_directory() . '/all_posts_ajax');
 }
 
 if (!is_file(get_stylesheet_directory() . '/all_posts_ajax/post-card.php')) {
-	fopen(get_stylesheet_directory() . '/all_posts_ajax/post-card.php', 'w');
+    fopen(get_stylesheet_directory() . '/all_posts_ajax/post-card.php', 'w');
 }
 $plugin_all_ajax_dir = WP_PLUGIN_DIR . '/ajax-load-more-and-filters';
 global $plugin_all_ajax_dir;
