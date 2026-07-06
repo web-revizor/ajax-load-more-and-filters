@@ -28,6 +28,7 @@ global $load_more_variables;
         $categoriesCount = 0;
         $index = 0;
         $filter_item_limit = (int)($load_more_variables['filter_item_limit'] ?? 0);
+        $term = get_queried_object();
         ?>
         <div class="<?= esc_attr($load_more_variables['filter_row_classes']) ?>">
             <?php $categoriesArray = explode(',', $load_more_variables['filter_taxonomy']) ?>
@@ -43,6 +44,7 @@ global $load_more_variables;
                     $name = get_taxonomy($taxonomy);
                     $categories = get_terms($taxonomy, array(
                         'parent' => 0,
+                        'exclude' => $term->term_id,
                     ));
 
                     if ($filter_item_limit > 0) {

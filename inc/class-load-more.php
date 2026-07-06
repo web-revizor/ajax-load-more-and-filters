@@ -51,6 +51,8 @@ class WRALM_Load_More
         $prev_text = isset($_POST['prev_text']) ? sanitize_text_field($_POST['prev_text']) : '';
         $next_text = isset($_POST['next_text']) ? sanitize_text_field($_POST['next_text']) : '';
         $base_url = isset($_POST['base_url']) ? esc_url_raw($_POST['base_url']) : home_url('/');
+        $category_id = isset($_POST['category_id']) ? (int)$_POST['category_id'] : 0;
+        $category_taxonomy = isset($_POST['category_taxonomy']) ? sanitize_text_field($_POST['category_taxonomy']) : '';
         $tax_query = array('relation' => 'AND');
         $search = '';
         $order = 'DESC';
@@ -61,6 +63,14 @@ class WRALM_Load_More
 
         if (!empty($_POST['order'])) {
             $order = sanitize_text_field($_POST['order']);
+        }
+
+        if ($category_id && !empty($category_taxonomy)) {
+            $tax_query[] = array(
+                'taxonomy' => sanitize_key($category_taxonomy),
+                'field' => 'term_id',
+                'terms' => array((int)$category_id),
+            );
         }
 
         if ($categories) {

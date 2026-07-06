@@ -40,6 +40,16 @@ class WRALM_Shortcode
         $next_text = $a['next_text'];
         $filter_id = $a['filter_id'];
 
+        $term = get_queried_object();
+        if ($term instanceof WP_Term) {
+            $term_id = $term->term_id;
+            $taxonomy = $term->taxonomy;
+        } else {
+            $term_id = 0;
+            $taxonomy = '';
+        }
+
+
         $args = array(
             'post_type' => $posts_type,
             'posts_per_page' => $posts_per_page,
@@ -57,6 +67,17 @@ class WRALM_Shortcode
                 ),
             ),
         );
+
+        if ($term_id != 0 && !empty($taxonomy)) {
+            $args['tax_query'] = array(
+                array(
+                    'taxonomy' => $taxonomy,
+                    'field' => 'term_id',
+                    'terms' => array($term_id),
+                ),
+            );
+        }
+
 
         $posts_result = '';
         $my_load_more_pagination = '';
@@ -97,7 +118,6 @@ class WRALM_Shortcode
         endif;
 
         $filter_data_attr = $filter_id ? ' data-filter-id="' . esc_attr($filter_id) . '"' : '';
-
         $results = '<div class="ajax_row_holder" data-init-page="' . esc_attr(max(1, get_query_var('paged'))) . '">';
         $results .= '<div class="ajax_row ' . esc_attr($row_classes) . '"' . $filter_data_attr
             . ' data-pagination-type="' . esc_attr($type_pagination) . '"'
@@ -106,7 +126,9 @@ class WRALM_Shortcode
             . ' data-more-classes="' . esc_attr($load_more_classes) . '"'
             . ' data-more-label="' . esc_attr($load_more_label) . '"'
             . ' data-prev-text="' . esc_attr($prev_text) . '"'
-            . ' data-next-text="' . esc_attr($next_text) . '">';
+            . ' data-next-text="' . esc_attr($next_text) . '"'
+            . ' data-cat-id="' . esc_attr($term_id) . '"'
+            . ' data-cat-taxonomy="' . esc_attr($taxonomy) . '">';
         $results .= $posts_result;
         $results .= '</div>';
         $results .= $my_load_more_pagination;
