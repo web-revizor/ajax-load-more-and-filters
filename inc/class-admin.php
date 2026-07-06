@@ -19,6 +19,29 @@ class WRALM_Admin
         add_action('admin_enqueue_scripts', [$this, 'enqueue_assets']);
     }
 
+    /**
+     * Ensures the theme has a place to put post-card templates.
+     * Runs once, on activation, instead of on every page load.
+     */
+    public static function create_card_template()
+    {
+        $theme_dir = get_stylesheet_directory() . '/all_posts_ajax';
+
+        if (!is_dir($theme_dir)) {
+            wp_mkdir_p($theme_dir);
+        }
+
+        $card_file = $theme_dir . '/post-card.php';
+
+        if (!is_file($card_file)) {
+            // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen
+            $handle = @fopen($card_file, 'w');
+            if ($handle) {
+                fclose($handle);
+            }
+        }
+    }
+
     public function add_menu_page()
     {
         add_menu_page(
@@ -41,8 +64,6 @@ class WRALM_Admin
         // React/ReactDOM are externalized in the Vite build (see
         // frontend/vite.config.ts), so they must be enqueued as separate
         // script dependencies before dist/app.js loads.
-        wp_enqueue_script('react', 'https://unpkg.com/react@18.3.1/umd/react.production.min.js', [], '18.3.1', true);
-        wp_enqueue_script('react-dom', 'https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js', ['react'], '18.3.1', true);
         wp_enqueue_script('wralm-admin', WRALM_URL . 'dist/app.js', ['react', 'react-dom'], WRALM_VERSION, true);
     }
 
@@ -73,28 +94,5 @@ class WRALM_Admin
         </div>
         <?php
         require_once WRALM_PATH . 'template-parts/sprite.php';
-    }
-
-    /**
-     * Ensures the theme has a place to put post-card templates.
-     * Runs once, on activation, instead of on every page load.
-     */
-    public static function create_card_template()
-    {
-        $theme_dir = get_stylesheet_directory() . '/all_posts_ajax';
-
-        if (!is_dir($theme_dir)) {
-            wp_mkdir_p($theme_dir);
-        }
-
-        $card_file = $theme_dir . '/post-card.php';
-
-        if (!is_file($card_file)) {
-            // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen
-            $handle = @fopen($card_file, 'w');
-            if ($handle) {
-                fclose($handle);
-            }
-        }
     }
 }

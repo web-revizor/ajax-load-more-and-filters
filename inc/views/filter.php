@@ -5,12 +5,17 @@ if (!defined('ABSPATH')) {
 
 global $load_more_variables;
 ?>
-<form id="all_posts_filter" class="all_posts_form" role="search">
+<form id="all_posts_filter"
+      class="all_posts_form"
+      role="search">
     <?php if ($load_more_variables['enable_search'] === 'true'): ?>
         <div class="all-post-search-holder">
             <input class="all-post-search"
-                   type="search" id="all-post-search" placeholder="<?= esc_attr($load_more_variables['search_placeholder']); ?>">
-            <button type="submit" class="all-post-submit">
+                   type="search"
+                   id="all-post-search"
+                   placeholder="<?= esc_attr($load_more_variables['search_placeholder']); ?>">
+            <button type="submit"
+                    class="all-post-submit">
                 <?= esc_html($load_more_variables['label_search_button']); ?>
             </button>
         </div>
@@ -22,6 +27,7 @@ global $load_more_variables;
         $filter_expand_class = $load_more_variables['filter_expand_class'];
         $categoriesCount = 0;
         $index = 0;
+        $filter_item_limit = (int)($load_more_variables['filter_item_limit'] ?? 0);
         ?>
         <div class="<?= esc_attr($load_more_variables['filter_row_classes']) ?>">
             <?php $categoriesArray = explode(',', $load_more_variables['filter_taxonomy']) ?>
@@ -58,8 +64,9 @@ global $load_more_variables;
                         }
                         ?>
                         <button type="submit"
-                                class="js-category-filter multiply-<?= esc_attr($load_more_variables['multiply_filter']) ?> <?= esc_attr($load_more_variables['filter_item_classes']); ?><?= ($childrensCat) ? ' parentCategory' : '' ?><?= $filter_item_limit > 0 && $filter_item_limit >= $index ? '' : ' hidden' ?>"
-                                data-taxonomy="<?= esc_attr($taxonomy) ?>" data-slug="<?= esc_attr($category->slug); ?>">
+                                class="js-category-filter multiply-<?= esc_attr($load_more_variables['multiply_filter']) ?> <?= esc_attr($load_more_variables['filter_item_classes']); ?><?= ($childrensCat) ? ' parentCategory' : '' ?><?= $filter_item_limit <= 0 || $index < $filter_item_limit ? '' : ' hidden' ?>"
+                                data-taxonomy="<?= esc_attr($taxonomy) ?>"
+                                data-slug="<?= esc_attr($category->slug); ?>">
                             <span class="text"><?= esc_html($category->name); ?></span>
                             <span class="postCount"><?= (int)$category->count; ?></span>
                         </button>
@@ -114,7 +121,8 @@ global $load_more_variables;
                 <?php endforeach; ?>
             <?php endif; ?>
             <?php if ($load_more_variables['enable_clear_button'] === 'true'): ?>
-                <button type="submit" class="js-clear-filter">
+                <button type="submit"
+                        class="js-clear-filter">
                     <?php esc_html_e('Clear Filters', 'wr-ajax-load-more-and-filters'); ?>
                 </button>
             <?php endif; ?>
