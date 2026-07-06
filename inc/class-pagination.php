@@ -95,8 +95,9 @@ class WRALM_Pagination
             }
             $link .= $args['add_fragment'];
             $page_links[] = sprintf(
-                '<a class="prev load_page" href="%s">%s</a>',
+                '<a class="prev load_page" href="%s" data-page="%s">%s</a>',
                 esc_url(apply_filters('paginate_links', $link)),
+                number_format_i18n($current - 1),
                 $args['prev_text']
             );
         else :
@@ -141,8 +142,9 @@ class WRALM_Pagination
             }
             $link .= $args['add_fragment'];
             $page_links[] = sprintf(
-                '<a class="next load_page" href="%s">%s</a>',
+                '<a class="next load_page" href="%s" data-page="%s">%s</a>',
                 esc_url(apply_filters('paginate_links', $link)),
+                number_format_i18n($current + 1),
                 $args['next_text']
             );
             $page_links_more[] = sprintf(
