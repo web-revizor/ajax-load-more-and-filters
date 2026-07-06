@@ -75,6 +75,9 @@ jobs:
           rsync -av --exclude='node_modules' \
                     --exclude='.git' \
                     --exclude='.github' \
+                    --exclude='yarn.lock' \
+                    --exclude='package.json' \
+                    --exclude='gulpfile.js' \
                     --exclude='frontend' \
                     --exclude='.gitignore' \
                     --exclude='.editorconfig' \
