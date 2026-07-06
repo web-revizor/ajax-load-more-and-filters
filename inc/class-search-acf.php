@@ -1,19 +1,11 @@
 <?php
-
 if (!defined('ABSPATH')) {
     exit;
 }
 
 /**
  * Extends the default WordPress search to also match ACF field values,
- * by caching the list of registered ACF field names in a WordPress
- * option whenever a field group is saved.
- *
- * Earlier versions of this class kept that cache in a dedicated DB
- * table that got DROPped and recreated from scratch on every single
- * `acf/save_post` — expensive, momentarily breaks search for anyone
- * hitting it mid-rebuild, and total overkill for one row of data. A
- * plain option does the same job with a single autoloaded read.
+ * by caching the list of registered ACF field names in a WordPress option.
  */
 class WRALM_Search_ACF
 {
@@ -21,38 +13,131 @@ class WRALM_Search_ACF
 
     public function __construct()
     {
+        // Hook into ACF save post
         add_action('acf/save_post', [$this, 'refresh_searchable_fields'], 20);
         add_filter('posts_search', [$this, 'extend_search_query'], 500, 2);
     }
 
     /**
-     * Rebuilds the cached list of searchable ACF field names whenever an
-     * ACF field group is saved. Requires the ACF plugin to be active.
+     * Rebuilds the cached list of searchable ACF field names.
+     * FIX: Only triggers when an ACF Field Group is saved, preventing
+     * massive memory/CPU spikes on regular post saves.
      */
-    public function refresh_searchable_fields()
+    public function refresh_searchable_fields($post_id)
     {
+        // Prevent execution on regular posts/pages
+        if (get_post_type($post_id) !== 'acf-field-group') {
+            return;
+        }
+
         if (!function_exists('acf_get_field_groups') || !function_exists('acf_get_fields')) {
             return;
         }
 
-        $args = array(
-            'public' => true,
-            '_builtin' => false,
-        );
-        $post_types = get_post_types($args, 'names', 'and');
+        $post_types = get_post_types(['public' => true, '_builtin' => false], 'names');
+        $field_names = [];
 
-        $field_names = array();
         foreach ($post_types as $post_type) {
-            $groups = acf_get_field_groups(array('post_type' => $post_type));
+            $groups = acf_get_field_groups(['post_type' => $post_type]);
+            if (empty($groups)) continue;
+
             foreach ($groups as $group) {
                 $fields = acf_get_fields($group['key']);
+                if (empty($fields)) continue;
+
                 foreach ($fields as $field) {
-                    $field_names[] = $field['name'];
+                    if (!empty($field['name'])) {
+                        $field_names[] = $field['name'];
+                    }
                 }
             }
         }
 
-        update_option(self::OPTION_NAME, array_values(array_unique($field_names)), false);
+        // FIX: Enable autoload (3rd param = true) to avoid extra DB queries on every search.
+        update_option(self::OPTION_NAME, array_values(array_unique($field_names)), true);
+    }
+
+    /**
+     * Rebuilds the `WHERE` clause of a front-end search dynamically.
+     */
+    public function extend_search_query($where, $wp_query)
+    {
+        global $wpdb;
+
+        if (empty($where) || empty($wp_query->query_vars['s'])) {
+            return $where;
+        }
+
+        $search_term = $wp_query->query_vars['s'];
+        // Filter out empty strings caused by multiple spaces
+        $terms = array_filter(explode(' ', $search_term));
+        if (empty($terms)) {
+            return $where;
+        }
+
+        // FIX: Dynamically fetch all public taxonomies instead of hardcoding them
+        $taxonomies = get_taxonomies(['public' => true], 'names');
+        if (empty($taxonomies)) {
+            return $where;
+        }
+        $tax_placeholders = implode(',', array_fill(0, count($taxonomies), '%s'));
+
+        $acf_fields = $this->get_searchable_fields();
+        $has_acf = !empty($acf_fields);
+
+        // FIX: Optimize Meta Query.
+        // Instead of generating N "OR meta_key LIKE" conditions, use a single "IN" clause.
+        $meta_key_sql = '';
+        if ($has_acf) {
+            $acf_placeholders = implode(',', array_fill(0, count($acf_fields), '%s'));
+            $meta_key_sql = "meta_key IN ({$acf_placeholders}) AND ";
+        }
+
+        // Base SQL structure for a single search term
+        $base_sql = "
+            ({$wpdb->posts}.post_title LIKE %s)
+            OR ({$wpdb->posts}.post_content LIKE %s)
+            OR EXISTS (
+                SELECT 1 FROM {$wpdb->postmeta}
+                WHERE post_id = {$wpdb->posts}.ID
+                AND {$meta_key_sql} meta_value LIKE %s
+            )
+            OR EXISTS (
+                SELECT 1 FROM {$wpdb->comments}
+                WHERE comment_post_ID = {$wpdb->posts}.ID
+                AND comment_content LIKE %s
+            )
+            OR EXISTS (
+                SELECT 1 FROM {$wpdb->term_relationships}
+                INNER JOIN {$wpdb->term_taxonomy} ON {$wpdb->term_taxonomy}.term_taxonomy_id = {$wpdb->term_relationships}.term_taxonomy_id
+                INNER JOIN {$wpdb->terms} ON {$wpdb->terms}.term_id = {$wpdb->term_taxonomy}.term_id
+                WHERE {$wpdb->term_relationships}.object_id = {$wpdb->posts}.ID
+                AND {$wpdb->term_taxonomy}.taxonomy IN ({$tax_placeholders})
+                AND {$wpdb->terms}.name LIKE %s
+            )
+        ";
+
+        $new_where = '';
+
+        foreach ($terms as $term) {
+            $like = '%' . $wpdb->esc_like($term) . '%';
+
+            // Build parameters array sequentially to avoid memory overhead of array_merge in loops
+            $params = [$like, $like]; // post_title, post_content
+
+            if ($has_acf) {
+                $params = array_merge($params, $acf_fields); // meta_key IN (...)
+            }
+            $params[] = $like; // meta_value
+            $params[] = $like; // comment_content
+
+            $params = array_merge($params, $taxonomies); // taxonomy IN (...)
+            $params[] = $like; // term name
+
+            $new_where .= $wpdb->prepare(" AND ({$base_sql})", $params);
+        }
+
+        return $new_where;
     }
 
     /**
@@ -60,85 +145,7 @@ class WRALM_Search_ACF
      */
     private function get_searchable_fields()
     {
-        $fields = get_option(self::OPTION_NAME, array());
-
-        return is_array($fields) ? $fields : array();
-    }
-
-    /**
-     * Rebuilds the `WHERE` clause of a front-end search to also match
-     * ACF meta values, comment content, and taxonomy term names.
-     *
-     * Credit for the base query structure: Vincent Zurczak,
-     * https://vzurczak.wordpress.com/2013/06/15/extend-the-default-wordpress-search/
-     */
-    public function extend_search_query($where, $wp_query)
-    {
-        global $wpdb;
-
-        if (empty($where)) {
-            return $where;
-        }
-
-        $terms = $wp_query->query_vars['s'];
-        $exploded = explode(' ', $terms);
-        if ($exploded === false || count($exploded) === 0) {
-            $exploded = array($terms);
-        }
-
-        $list_searcheable_acf = $this->get_searchable_fields();
-
-        if (empty($list_searcheable_acf)) {
-            return $where;
-        }
-
-        $where = '';
-
-        foreach ($exploded as $tag) {
-            $like = '%' . $wpdb->esc_like($tag) . '%';
-
-            $meta_conditions = array();
-            $meta_params = array();
-            foreach ($list_searcheable_acf as $searcheable_acf) {
-                $meta_conditions[] = '(meta_key LIKE %s AND meta_value LIKE %s)';
-                $meta_params[] = '%' . $wpdb->esc_like($searcheable_acf) . '%';
-                $meta_params[] = $like;
-            }
-            $meta_where = implode(' OR ', $meta_conditions);
-
-            $where .= $wpdb->prepare(
-                " AND (
-                    ({$wpdb->posts}.post_title LIKE %s)
-                    OR ({$wpdb->posts}.post_content LIKE %s)
-                    OR EXISTS (
-                        SELECT * FROM {$wpdb->postmeta}
-                        WHERE post_id = {$wpdb->posts}.ID
-                        AND ({$meta_where})
-                    )
-                    OR EXISTS (
-                        SELECT * FROM {$wpdb->comments}
-                        WHERE comment_post_ID = {$wpdb->posts}.ID
-                        AND comment_content LIKE %s
-                    )
-                    OR EXISTS (
-                        SELECT * FROM {$wpdb->terms}
-                        INNER JOIN {$wpdb->term_taxonomy}
-                            ON {$wpdb->term_taxonomy}.term_id = {$wpdb->terms}.term_id
-                        INNER JOIN {$wpdb->term_relationships}
-                            ON {$wpdb->term_relationships}.term_taxonomy_id = {$wpdb->term_taxonomy}.term_taxonomy_id
-                        WHERE (
-                            taxonomy = 'post_tag'
-                            OR taxonomy = 'category'
-                            OR taxonomy = 'myCustomTax'
-                        )
-                        AND object_id = {$wpdb->posts}.ID
-                        AND {$wpdb->terms}.name LIKE %s
-                    )
-                )",
-                array_merge([$like, $like], $meta_params, [$like, $like])
-            );
-        }
-
-        return $where;
+        $fields = get_option(self::OPTION_NAME, []);
+        return is_array($fields) ? $fields : [];
     }
 }
