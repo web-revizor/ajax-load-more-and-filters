@@ -79,6 +79,7 @@ jobs:
                     --exclude='vite.config.js' \
                     --exclude='package.json' \
                     --exclude='frontend' \
+                    --exclude='src' \
                     --exclude='.gitignore' \
                     --exclude='.editorconfig' \
                     --exclude='.prettierignore' \
