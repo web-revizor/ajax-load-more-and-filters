@@ -2,18 +2,13 @@
 
 const babel = require('gulp-babel'),
   browserSync = require('browser-sync'),
-  cleanCSS = require('gulp-clean-css'),
   gulp = require('gulp'),
   gutil = require('gulp-util'),
   rigger = require('gulp-rigger'),
   rimraf = require('rimraf'),
-  sass = require('gulp-sass')(require('node-sass')),
-  sourcemaps = require('gulp-sourcemaps'),
   strip = require('gulp-strip-comments'),
   uglify = require('gulp-uglify'),
-  prettier = require('gulp-prettier'),
-  postcss = require('gulp-postcss'),
-  tailwindcss = require('tailwindcss');
+  prettier = require('gulp-prettier');
 
 function swallowError(error) {
   // If you want details of the error in the console
@@ -27,23 +22,24 @@ const folders = {
 };
 
 const path = {
-  config: './tailwind.config.js',
   build: {
     js: folders.dst + 'dist/js/',
-    css: folders.dst + 'dist/css/',
   },
   src: {
     js: folders.src + 'js/*.js',
-    css: folders.src + 'styles/app.scss',
   },
   watch: {
     js: folders.src + 'js/**/*.js',
-    css: folders.src + 'styles/**/**/*.scss',
   },
-  clean: ['js', 'css'],
-  node: 'node_modules',
+  clean: ['dist/js'],
 };
 
+// Builds the public-facing load-more/filter script (dist/js/load_more_and_filter.js).
+// No sourcemaps here on purpose: this is what actually ships inside the
+// plugin zip, and a shipped .js with no matching .map next to it just
+// 404s in the browser console. The admin UI is a separate Vite+React
+// project — see frontend/ (which also ships without sourcemaps, by Vite's
+// own default, so this keeps both bundles consistent).
 gulp.task('js:build', function () {
   return gulp
     .src(path.src.js)
@@ -55,10 +51,8 @@ gulp.task('js:build', function () {
     .on('error', swallowError)
     .pipe(rigger())
     .pipe(strip())
-    .pipe(sourcemaps.init())
     .pipe(uglify())
     .on('error', gutil.log)
-    .pipe(sourcemaps.write('/'))
     .pipe(gulp.dest(path.build.js))
     .pipe(
       browserSync.reload({
@@ -74,47 +68,16 @@ gulp.task('js:prettier', function () {
     .pipe(gulp.dest('./src/js'));
 });
 
-gulp.task('styles:build', () => {
-  return gulp
-    .src(path.src.css)
-    .pipe(
-      sass({
-        includePaths: [path.src.css],
-        outputStyle: 'compressed',
-        sourceMap: true,
-        errLogToConsole: true,
-      })
-    )
-    .pipe(postcss([tailwindcss(path.config), require('autoprefixer')]))
-    .pipe(cleanCSS({ level: { 0: { specialComments: 0 } } }))
-    .pipe(sourcemaps.write('/'))
-    .pipe(gulp.dest(path.build.css))
-    .pipe(
-      browserSync.reload({
-        stream: true,
-      })
-    );
-});
-
-gulp.task('styles:prettier', function () {
-  return gulp
-    .src('./src/styles/**/*.*')
-    .pipe(prettier({ singleQuote: true }))
-    .pipe(gulp.dest('./src/styles'));
-});
-
 gulp.task('clean', function (cb) {
-  for (var i = 0; i < path.clean.length; i++) {
+  for (let i = 0; i < path.clean.length; i++) {
     rimraf(path.clean[i], cb);
   }
 });
 
-gulp.task('default', gulp.parallel('js:build', 'styles:build'));
+gulp.task('default', gulp.parallel('js:build'));
 
-gulp.task('prettier', gulp.parallel('styles:prettier', 'js:prettier'));
+gulp.task('prettier', gulp.parallel('js:prettier'));
 
-// ✅ Watch task
 gulp.task('watch', function () {
   gulp.watch(path.watch.js, gulp.series('js:build'));
-  gulp.watch(path.watch.css, gulp.series('styles:build'));
 });

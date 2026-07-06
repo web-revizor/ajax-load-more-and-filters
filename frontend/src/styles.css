@@ -1,0 +1,142 @@
+.wralm-app {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 700px;
+}
+
+.wralm-title {
+  font-weight: 700;
+  font-size: 30px;
+  margin-top: 20px;
+}
+
+.wralm-hint {
+  font-size: 16px;
+  font-weight: 600;
+  display: inline-block;
+  padding: 20px;
+  background: #f7fcff;
+  border-radius: 6px;
+  max-width: 80%;
+}
+
+.wralm-layout {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.wralm-tabs {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+}
+
+.wralm-tab {
+  display: block;
+  width: 100%;
+  padding: 14px 28px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  background: #fff;
+  color: #2539ab;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+  margin-bottom: 4px;
+}
+
+.wralm-tab:hover {
+  color: #2539ab;
+}
+
+.wralm-tab.is-active {
+  background: #2539ab;
+  color: #fff;
+}
+
+.wralm-panels {
+  background: #fff;
+  border-radius: 6px;
+  flex: 1;
+  padding: 20px;
+  max-width: 600px;
+}
+
+.wralm-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 300px;
+}
+
+.wralm-field {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.wralm-checkbox-label {
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.wralm-input {
+  display: block;
+  width: 100%;
+  min-height: auto;
+  border-radius: 4px;
+  border: 1px solid #aaa;
+  background: #fff;
+  padding: 0.64rem 0.75rem;
+  font-size: 16px;
+  line-height: 1.6;
+  outline: none;
+  transition: box-shadow 0.2s ease-linear;
+}
+
+.wralm-input:focus {
+  box-shadow: none;
+}
+
+select.wralm-input[multiple] {
+  min-height: 140px;
+}
+
+.wralm-field label:not(.wralm-checkbox-label) {
+  font-weight: 700;
+}
+
+.wralm-shortcode-field {
+  position: relative;
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  max-width: 500px;
+}
+
+.wralm-shortcode-input {
+  cursor: pointer;
+  flex: 1;
+}
+
+.wralm-copy-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #808080;
+  padding: 0;
+}
+
+.wralm-copy-btn:hover {
+  color: #2539ab;
+}

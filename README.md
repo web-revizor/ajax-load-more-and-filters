@@ -1,10 +1,22 @@
-# AJAX load more and filters
+# Web Revizor: Ajax Load More & Filters
 
 ## WordPress plugin
 
 Easy load more, filter and searching
 
 [Download](https://github.com/web-revizor/ajax-load-more-and-filters/releases)
+
+### Admin console
+
+The shortcode-builder screen (**WR Ajax Load More** in the admin menu) is a
+small React app — see `frontend/` for its source and `frontend/AGENTS.md`
+for how to work on it. Run `npm install && npm run build` inside
+`frontend/` after any change there to regenerate `dist/app.js` and
+`dist/style.css`, which is what the plugin actually loads.
+
+The front-end load-more/filter script (`dist/js/load_more_and_filter.js`)
+is still built separately via Gulp — run `npm install && npx gulp
+js:build` from the plugin root after changing `src/js/load_more_and_filter.js`.
 
 ### Pagination:
 

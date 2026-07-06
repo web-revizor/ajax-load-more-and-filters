@@ -1,0 +1,17 @@
+<?php
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+global $load_more_variables;
+?>
+<div>
+    <select id="js-post-order">
+        <option value="DESC">
+            <?= esc_html($load_more_variables['label_newest_order']); ?>
+        </option>
+        <option value="ASC">
+            <?= esc_html($load_more_variables['label_old_order']) ?>
+        </option>
+    </select>
+</div>

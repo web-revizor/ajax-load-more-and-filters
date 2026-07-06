@@ -1,0 +1,145 @@
+name: Build WordPress Plugin
+
+on:
+  push:
+    branches: [ main, master ]
+    tags:
+      - 'v*'
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'yarn'
+          cache-dependency-path: |
+            yarn.lock
+            frontend/yarn.lock
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      # --- Admin console (frontend/ -> dist/app.js + dist/style.css) ---
+      - name: Install admin console dependencies
+        run: yarn install --frozen-lockfile
+        working-directory: frontend
+
+      - name: Build admin console
+        run: yarn build
+        working-directory: frontend
+
+      # --- Public load-more/filter script (src/js -> dist/js) ---
+      - name: Install public script build dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build public script
+        run: yarn build
+
+      - name: Get repository name
+        id: repo_name
+        run: echo "name=${GITHUB_REPOSITORY#*/}" >> $GITHUB_OUTPUT
+
+      - name: Get version from plugin file
+        id: get_version
+        run: |
+          # Шукаємо версію в основному PHP файлі плагіну
+          VERSION=$(grep -m 1 "Version:" *.php | sed 's/.*Version:\s*//' | tr -d '\r\n' | xargs)
+          if [ -z "$VERSION" ]; then
+            VERSION=$(date +%Y.%m.%d-%H%M%S)
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=v$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Prepare plugin directory
+        run: |
+          mkdir -p plugin-build/${{ steps.repo_name.outputs.name }}
+
+      - name: Copy plugin files
+        run: |
+          # Копіюємо всі PHP файли та зібрані ресурси, без вихідників фронтенду й dev-тулінгу
+          rsync -av --exclude='node_modules' \
+                    --exclude='.git' \
+                    --exclude='.github' \
+                    --exclude='frontend' \
+                    --exclude='.gitignore' \
+                    --exclude='.editorconfig' \
+                    --exclude='.prettierignore' \
+                    --exclude='*.md' \
+                    --exclude='*.map' \
+                    --exclude='plugin-build' \
+                    ./ plugin-build/${{ steps.repo_name.outputs.name }}/
+
+      - name: Create plugin archive
+        run: |
+          cd plugin-build
+          zip -r ${{ steps.repo_name.outputs.name }}_${{ steps.get_version.outputs.version }}.zip ${{ steps.repo_name.outputs.name }}
+          cd ..
+          mv plugin-build/${{ steps.repo_name.outputs.name }}_${{ steps.get_version.outputs.version }}.zip ./
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.repo_name.outputs.name }}_${{ steps.get_version.outputs.version }}
+          path: ${{ steps.repo_name.outputs.name }}_${{ steps.get_version.outputs.version }}.zip
+          retention-days: 30
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          # Отримуємо останній тег
+          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          
+          if [ -z "$LAST_TAG" ]; then
+            # Якщо тегів немає, беремо всі коміти
+            CHANGELOG=$(git log --pretty=format:"- %s (%h)" --no-merges)
+          else
+            # Беремо коміти з останнього тегу
+            CHANGELOG=$(git log ${LAST_TAG}..HEAD --pretty=format:"- %s (%h)" --no-merges)
+          fi
+          
+          # Зберігаємо в файл
+          echo "$CHANGELOG" > changelog.txt
+          
+          # Якщо changelog порожній
+          if [ -z "$CHANGELOG" ]; then
+            echo "- Build from commit $(git rev-parse --short HEAD)" > changelog.txt
+          fi
+
+      - name: Create/Update Release
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.get_version.outputs.tag }}
+          name: Release ${{ steps.get_version.outputs.version }}
+          body_path: changelog.txt
+          files: ${{ steps.repo_name.outputs.name }}_${{ steps.get_version.outputs.version }}.zip
+          draft: false
+          prerelease: false
+          make_latest: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create Release for tagged version
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: changelog.txt
+          files: ${{ steps.repo_name.outputs.name }}_${{ steps.get_version.outputs.version }}.zip
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
