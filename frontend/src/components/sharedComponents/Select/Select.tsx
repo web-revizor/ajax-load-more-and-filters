@@ -18,9 +18,9 @@ interface ISelect {
   className?: string;
   wrapperClassName?: string;
   required?: boolean;
-  onChange?: (value: string) => void;
+  onChange?: (value: string | string[]) => void;
   onBlur?: () => void;
-  value?: string;
+  value?: string | string[];
   name?: string;
   error?: boolean;
   errorMessage?: string;
@@ -29,6 +29,7 @@ interface ISelect {
   searchable?: boolean;
   position?: 'top' | 'bottom';
   dataTooltip?: string;
+  multiple?: boolean;
 }
 
 export default function Select({
@@ -48,11 +49,17 @@ export default function Select({
   searchable = false,
   position = 'bottom',
   dataTooltip,
+  multiple = false,
 }: ISelect) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
 
-  const selectedLabel = options.find((opt) => opt.value === value)?.label || '';
+  const selectedLabel = multiple
+    ? options
+        .filter((opt) => (value as string[] | undefined)?.includes(opt.value))
+        .map((opt) => opt.label)
+        .join(', ')
+    : options.find((opt) => opt.value === value)?.label || '';
 
   const filteredOptions =
     searchable && search
@@ -62,6 +69,18 @@ export default function Select({
       : options;
 
   const handleSelect = (val: string) => {
+    if (multiple) {
+      const values = Array.isArray(value) ? value : [];
+
+      onChange?.(
+        values.includes(val)
+          ? values.filter((v) => v !== val)
+          : [...values, val]
+      );
+
+      return;
+    }
+
     onChange?.(val);
     setOpen(false);
     setSearch('');
@@ -101,13 +120,21 @@ export default function Select({
               : 'border-outline-variant/30 ring-transparent'
           )}
         >
-          <input id={id} name={name} type='hidden' value={value} />
+          {multiple ? (
+            (Array.isArray(value) ? value : []).map((v) => (
+              <input key={v} id={id} name={name} type='hidden' value={v} />
+            ))
+          ) : (
+            <input id={id} name={name} type='hidden' value={value} />
+          )}
 
           <div className='flex items-center justify-between'>
             <span
               className={clsx(
                 'whitespace-nowrap overflow-ellipsis flex-1 overflow-hidden block',
-                !value && 'opacity-50'
+                !(multiple
+                  ? Array.isArray(value) && value.length > 0
+                  : value) && 'opacity-50'
               )}
             >
               {selectedLabel || placeholder || 'Select'}
@@ -169,7 +196,9 @@ export default function Select({
                     'cursor-pointer hover:bg-primary/10 overflow-hidden overflow-ellipsis whitespace-nowrap',
                     size === 'default' && 'px-4 py-2',
                     size === 'small' && 'px-2 py-1',
-                    opt.value === value && 'bg-primary/10'
+                    (multiple
+                      ? (value as string[] | undefined)?.includes(opt.value)
+                      : opt.value === value) && 'bg-primary/10'
                   )}
                   {...(opt.toolTipText
                     ? { 'data-tooltip': opt.toolTipText }

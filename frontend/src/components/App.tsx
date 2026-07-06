@@ -33,8 +33,9 @@ export function App({ settings }: Props) {
       <h1>All Post AJAX</h1>
 
       <div className='glass-card p-5 rounded-2xl'>
-        Edit a post-card.php in &quot;/all_posts_ajax/&quot; or create new{' '}
-        {'{post-name}'}-card.php
+        Edit a <span className={'text-secondary'}>post-card.php</span> in
+        "/all_posts_ajax/" or create new{' '}
+        <span className={'text-secondary'}>{'{post-type}'}-card.php</span>
       </div>
 
       <div className='flex gap-5'>

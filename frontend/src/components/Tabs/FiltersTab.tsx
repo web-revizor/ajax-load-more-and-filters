@@ -1,4 +1,4 @@
-import type { ChangeEvent, Dispatch, SetStateAction } from 'react';
+import type { Dispatch, SetStateAction } from 'react';
 import { FilterSettings, FilterType } from '@/src/types';
 
 import Toggle from '@/src/components/sharedComponents/Toggle/Toggle';
@@ -25,11 +25,8 @@ export function FiltersTab({ taxonomies, filters, setFilters }: Props) {
     setFilters((prev) => ({ ...prev, [key]: value }));
   }
 
-  function handleTaxonomyChange(e: ChangeEvent<HTMLSelectElement>) {
-    const selected = Array.from(e.target.selectedOptions).map(
-      (opt) => opt.value
-    );
-    update('filterTaxonomy', selected);
+  function handleTaxonomyChange(value: string | string[]) {
+    update('filterTaxonomy', Array.isArray(value) ? value : [value]);
   }
 
   const allTaxonomies = [
@@ -50,20 +47,19 @@ export function FiltersTab({ taxonomies, filters, setFilters }: Props) {
       <SlideDown isOpen={filters.filterByCategory}>
         {filters.filterByCategory && (
           <div className='flex flex-col gap-4'>
-            <select
+            <Select
               id='filter_taxonomy'
               className='wralm-input'
               multiple
               value={filters.filterTaxonomy}
+              options={allTaxonomies.map((tax) => ({
+                value: tax,
+                label:
+                  tax.charAt(0).toUpperCase() +
+                  tax.slice(1).replace(/[_-]/g, ' '),
+              }))}
               onChange={handleTaxonomyChange}
-            >
-              {allTaxonomies.map((tax) => (
-                <option key={tax} value={tax}>
-                  {tax.charAt(0).toUpperCase() +
-                    tax.slice(1).replace(/[_-]/g, ' ')}
-                </option>
-              ))}
-            </select>
+            />
 
             <Toggle
               size={'small'}
