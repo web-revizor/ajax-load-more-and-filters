@@ -10,13 +10,14 @@ Easy load more, filter and searching
 
 The shortcode-builder screen (**WR Ajax Load More** in the admin menu) is a
 small React app — see `frontend/` for its source and `frontend/AGENTS.md`
-for how to work on it. Run `npm install && npm run build` inside
+for how to work on it. Run `yarn install && yarn build` inside
 `frontend/` after any change there to regenerate `dist/app.js` and
 `dist/style.css`, which is what the plugin actually loads.
 
 The front-end load-more/filter script (`dist/js/load_more_and_filter.js`)
-is still built separately via Gulp — run `npm install && npx gulp
-js:build` from the plugin root after changing `src/js/load_more_and_filter.js`.
+is built by a separate, plain Vite config at the plugin root (`vite.config.js`) —
+run `yarn install && yarn build` from the plugin root after changing
+`src/js/load_more_and_filter.js`.
 
 ### Pagination:
 

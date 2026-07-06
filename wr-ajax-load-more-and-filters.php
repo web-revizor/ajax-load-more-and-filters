@@ -17,7 +17,7 @@ if (!defined('ABSPATH')) {
 
 define('WRALM_PATH', plugin_dir_path(__FILE__));
 define('WRALM_URL', plugin_dir_url(__FILE__));
-define('WRALM_VERSION', '1.3.2');
+define('WRALM_VERSION', '1.3.1');
 
 require_once WRALM_PATH . 'inc/class-pagination.php';
 require_once WRALM_PATH . 'inc/class-shortcode.php';
