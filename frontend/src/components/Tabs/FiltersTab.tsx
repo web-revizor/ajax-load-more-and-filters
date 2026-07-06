@@ -1,0 +1,129 @@
+import type { ChangeEvent, Dispatch, SetStateAction } from 'react';
+import { FilterSettings, FilterType } from '@/src/types';
+
+import Toggle from '@/src/components/sharedComponents/Toggle/Toggle';
+import Select from '@/src/components/sharedComponents/Select/Select';
+import Input from '@/src/components/sharedComponents/Input/Input';
+import SlideDown from '@/src/components/sharedComponents/SlideDown/SlideDown';
+
+interface Props {
+  taxonomies: string[];
+  filters: FilterSettings;
+  setFilters: Dispatch<SetStateAction<FilterSettings>>;
+}
+
+const FILTER_TYPE_OPTIONS: { value: FilterType; label: string }[] = [
+  { value: 'button', label: 'Button' },
+  { value: 'select', label: 'Select' },
+];
+
+export function FiltersTab({ taxonomies, filters, setFilters }: Props) {
+  function update<K extends keyof FilterSettings>(
+    key: K,
+    value: FilterSettings[K]
+  ) {
+    setFilters((prev) => ({ ...prev, [key]: value }));
+  }
+
+  function handleTaxonomyChange(e: ChangeEvent<HTMLSelectElement>) {
+    const selected = Array.from(e.target.selectedOptions).map(
+      (opt) => opt.value
+    );
+    update('filterTaxonomy', selected);
+  }
+
+  const allTaxonomies = [
+    'category',
+    'post_tag',
+    ...taxonomies.filter((t) => t !== 'category' && t !== 'post_tag'),
+  ];
+
+  return (
+    <div className='flex flex-col gap-4'>
+      <Toggle
+        size={'small'}
+        label={'Filter by category'}
+        value={filters.filterByCategory}
+        onChange={(v) => update('filterByCategory', v)}
+      />
+
+      <SlideDown isOpen={filters.filterByCategory}>
+        {filters.filterByCategory && (
+          <div className='flex flex-col gap-4'>
+            <select
+              id='filter_taxonomy'
+              className='wralm-input'
+              multiple
+              value={filters.filterTaxonomy}
+              onChange={handleTaxonomyChange}
+            >
+              {allTaxonomies.map((tax) => (
+                <option key={tax} value={tax}>
+                  {tax.charAt(0).toUpperCase() +
+                    tax.slice(1).replace(/[_-]/g, ' ')}
+                </option>
+              ))}
+            </select>
+
+            <Toggle
+              size={'small'}
+              label={'Enable Clear Button'}
+              value={filters.enableClearButton}
+              onChange={(v) => update('enableClearButton', v)}
+            />
+
+            <Input
+              label='Filter row classes'
+              name={'filter_row_classes'}
+              id='filter_row_classes'
+              value={filters.filterRowClasses}
+              placeholder='filter_row'
+              onChange={(v) => update('filterRowClasses', v.target.value)}
+            />
+
+            <Select
+              label='Filter Type'
+              name={'filter_type'}
+              id='filter_type'
+              value={filters.filterType}
+              onChange={(v) => update('filterType', v as FilterType)}
+              options={FILTER_TYPE_OPTIONS}
+            />
+
+            <Toggle
+              size={'small'}
+              label='Enable Filter Titles'
+              value={filters.enableFilterTitles}
+              onChange={(v) => update('enableFilterTitles', v)}
+            />
+
+            <Toggle
+              size={'small'}
+              label={'Enable Multiply Filter'}
+              value={filters.multiplyFilter}
+              onChange={(v) => update('multiplyFilter', v)}
+            />
+
+            <Input
+              label='Filter item classes'
+              name={'filter_item_classes'}
+              id='filter_item_classes'
+              value={filters.filterItemClasses}
+              placeholder='filter_item'
+              onChange={(v) => update('filterItemClasses', v.target.value)}
+            />
+
+            <Input
+              label='Label all category button'
+              name={'all_category_button'}
+              id='all_category_button'
+              value={filters.allCategoryButton}
+              placeholder='All'
+              onChange={(v) => update('allCategoryButton', v.target.value)}
+            />
+          </div>
+        )}
+      </SlideDown>
+    </div>
+  );
+}

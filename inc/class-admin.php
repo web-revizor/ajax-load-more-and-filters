@@ -67,8 +67,12 @@ class WRALM_Admin
         <script>
             window.wralmSettings = <?php echo wp_json_encode($settings); ?>;
         </script>
-        <div id="wralm-console"></div>
+        <div class="wrap">
+            <div class="web-revizor-container"
+                 id="wralm-console"></div>
+        </div>
         <?php
+        require_once WRALM_PATH . 'template-parts/sprite.php';
     }
 
     /**
